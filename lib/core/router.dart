@@ -31,7 +31,7 @@ final GoRouter appRouter = GoRouter(
 		),
 		GoRoute(
 			path: '/calendar',
-			builder: (context, state) => const CalendarScreen(),
+			builder: (context, state) => const InteractiveCalendarScreen(),
 		),
 	]
 );

@@ -27,7 +27,7 @@ final GoRouter appRouter = GoRouter(
 		),
 		GoRoute(
 			path: '/generator',
-			builder: (context, state) => const GeneratorScreen(),
+			builder: (context, state) => const AIGeneratorScreen(),
 		),
 		GoRoute(
 			path: '/calendar',

@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:study_planner/models/subject.dart';
-import '../providers/subject.dart';
 
 final subjectsStreamProvider = StreamProvider.autoDispose<List<Subject>>((ref) {
   final uid = FirebaseAuth.instance.currentUser?.uid;

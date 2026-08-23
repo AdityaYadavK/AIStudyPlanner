@@ -19,11 +19,11 @@ final GoRouter appRouter = GoRouter(
 		),
 		GoRoute(
 			path: '/subjects',
-			builder: (context, state) => const SubjectsScreen(),
+			builder: (context, state) => const SubjectManagerScreen(),
 		),
 		GoRoute(
 			path: '/tasks',
-			builder: (context, state) => const TasksScreen(),
+			builder: (context, state) => const TaskInputScreen(),
 		),
 		GoRoute(
 			path: '/generator',

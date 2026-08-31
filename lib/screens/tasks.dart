@@ -90,7 +90,7 @@ class _TaskInputScreenState extends ConsumerState<TaskInputScreen> {
                     );
                   }
                   return DropdownButtonFormField<String>(
-                    value: _selectedSubjectId,
+                    initialValue: _selectedSubjectId,
                     decoration: const InputDecoration(
                       labelText: 'Select Subject',
                       border: OutlineInputBorder(),

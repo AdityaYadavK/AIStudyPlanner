@@ -8,7 +8,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // firebase init will added here
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  try {
+    print('Initializing Firebase...');
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    print('Firebase initialized successfully');
+  } catch (e) {
+    print('Firebase initialization error: $e');
+  }
 
   runApp(const ProviderScope(child: App()));
 }

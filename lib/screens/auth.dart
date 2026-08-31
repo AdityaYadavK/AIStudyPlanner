@@ -18,7 +18,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  double _dailyHours = 0;
+  double _dailyHours = 6.0;
 
   void _submit() async {
     if (!_formKey.currentState!.validate()) {
@@ -47,9 +47,23 @@ class _AuthScreenState extends State<AuthScreen> {
       }
     } catch (e) {
       if (mounted) {
+        print('Auth Error: $e');
+        print('Error Type: ${e.runtimeType}');
+        String errorMessage = 'An error occurred';
+        if (e is Exception) {
+          errorMessage = e.toString().replaceFirst('Exception: ', '');
+        } else {
+          errorMessage = e.toString();
+        }
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
       }
     } finally {
       if (mounted) {

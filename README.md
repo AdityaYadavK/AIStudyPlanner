@@ -1,8 +1,8 @@
-# AI Study Planner 📚
+# AI Study Planner 
 
 A Flutter app that helps students manage their study schedule with AI-powered planning. Get personalized study schedules generated instantly using Google Gemini AI.
 
-## ✨ Features
+##  Features
 
 | Feature | Description |
 |---------|-------------|
@@ -13,7 +13,7 @@ A Flutter app that helps students manage their study schedule with AI-powered pl
 | **AI Generator** | One-tap AI schedule generation using Google Gemini API |
 | **Calendar** | Interactive calendar view showing study blocks with completion tracking |
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 lib/
@@ -43,7 +43,7 @@ lib/
 └── pubspec.yaml
 ```
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### 1. Install Flutter
 If you haven't already, install Flutter from [https://docs.flutter.dev/get-started/install](https://docs.flutter.dev/get-started/install)
@@ -71,7 +71,7 @@ flutter pub get
 flutter run
 ```
 
-## ⚙️ Firebase Configuration
+##  Firebase Configuration
 
 ### Android — `android/app/build.gradle`
 Add the Google Services plugin:
@@ -92,7 +92,7 @@ buildscript {
 ### iOS — `ios/Runner/Info.plist`
 No special permissions required for this app.
 
-## 🤖 How AI Schedule Generation Works
+##  How AI Schedule Generation Works
 
 1. **Add Subjects** → Add subjects with difficulty ratings in Subject Manager
 2. **Create Tasks** → Add tasks/exams with due dates and estimated preparation time
@@ -105,7 +105,7 @@ No special permissions required for this app.
    - App creates schedule entries in Firestore
 5. **View Schedule** → Calendar displays generated blocks with completion tracking
 
-## 📋 Notes & Production Considerations
+##  Notes & Production Considerations
 
 - **API Key Security** — The Gemini API key is currently hardcoded. For production, use environment variables or a secure backend service
 - **Error Handling** — Add robust error handling for API failures and network issues
@@ -114,7 +114,7 @@ No special permissions required for this app.
 - **Testing** — Add unit and widget tests for critical components
 - **Authentication** — Consider adding additional auth providers (Google Sign-in, etc.)
 
-## 🛠️ Technologies Used
+##  Technologies Used
 
 - **Flutter** — Cross-platform mobile development framework
 - **Firebase** — Authentication and Firestore database
@@ -123,6 +123,6 @@ No special permissions required for this app.
 - **Google Generative AI** — AI-powered schedule generation
 - **table_calendar** — Interactive calendar widget
 
-## 📝 License
+##  License
 
 This project is open source and available under the MIT License.

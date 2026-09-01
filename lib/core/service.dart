@@ -12,7 +12,7 @@ class AIService {
   }) async {
     final model = GenerativeModel(
       model: 'gemini-1.5-flash',
-      apiKey: "AQ.Ab8RN6KLg_kkG1yiwWidGuOQYQX7TNzADPV4m8FiTmZweGb4bA",
+      apiKey: apiKey,
     );
 
     final prompt =

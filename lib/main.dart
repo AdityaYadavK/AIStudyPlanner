@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'core/router.dart';
 
@@ -11,6 +12,13 @@ void main() async {
   try {
     print('Initializing Firebase...');
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    
+    // Configure Firestore settings - disabling persistence initially to debug connectivity
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: false,
+      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+    );
+    
     print('Firebase initialized successfully');
   } catch (e) {
     print('Firebase initialization error: $e');
@@ -34,6 +42,7 @@ class App extends StatelessWidget {
         ),
       ),
       routerConfig: appRouter,
+      debugShowCheckedModeBanner: false,
     );
   }
 }

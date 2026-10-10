@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "232200820908",
-    "project_id": "study-planner-jovac-grp1",
-    "storage_bucket": "study-planner-jovac-grp1.firebasestorage.app"
+    "project_number": "848816487233",
+    "project_id": "aistudyplanner-abhishek",
+    "storage_bucket": "aistudyplanner-abhishek.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:232200820908:android:80cc0b510f197eaef9e709",
+        "mobilesdk_app_id": "1:848816487233:android:d6b3e2de90091882177fc0",
         "android_client_info": {
           "package_name": "com.example.study_planner"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBlZT9QSKjHExIaoyLEYkjTaQP6gM_od-4"
+          "current_key": "AIzaSyDl4QxhEP_ugp0adcc-MR9yGAJ8UivXtCQ"
         }
       ],
       "services": {

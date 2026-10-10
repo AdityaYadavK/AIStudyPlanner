@@ -1,171 +1,366 @@
-import 'dart:async';
+
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import '../core/service.dart';
 
 class AIGeneratorScreen extends ConsumerStatefulWidget {
   const AIGeneratorScreen({super.key});
 
   @override
-  ConsumerState<AIGeneratorScreen> createState() => _AIGeneratorScreenState();
+  ConsumerState<AIGeneratorScreen> createState() =>
+      _AIGeneratorScreenState();
 }
 
-class _AIGeneratorScreenState extends ConsumerState<AIGeneratorScreen> {
+class _AIGeneratorScreenState
+    extends ConsumerState<AIGeneratorScreen> {
   bool _isGenerating = false;
+  bool _savedToCloud = false;
 
-  void _generateSchedule() async {
-    print('Generate schedule button pressed');
+  List<Map<String, dynamic>> _schedule = [];
+
+  static const _purple = Color(0xFF7955F5);
+  static const _ink = Color(0xFF19152F);
+
+  Future<void> _generateSchedule() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    print('User ID: $uid');
+
     if (uid == null) {
-      print('User ID is null, returning');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please sign in first.')),
+      );
       return;
     }
 
-    print('Setting generating state to true');
-    setState(() => _isGenerating = true);
+    setState(() {
+      _isGenerating = true;
+      _savedToCloud = false;
+      _schedule = [];
+    });
 
     try {
-      print('Starting schedule generation process');
-      
-      // Generate random schedule data locally (mock for submission)
-      final studySubjects = [
-        'Mathematics', 'Physics', 'Chemistry', 'Biology', 
-        'English', 'History', 'Computer Science', 'Economics'
+      final subjects = [
+        'Mathematics',
+        'Physics',
+        'Chemistry',
+        'Biology',
+        'English',
+        'History',
+        'Computer Science',
+        'Economics',
       ];
-      
-      final studyActivities = [
-        'Review Notes', 'Practice Problems', 'Read Chapter', 
-        'Watch Tutorial', 'Complete Assignment', 'Group Study',
-        'Self-Quiz', 'Summarize Topics'
+
+      final activities = [
+        'Review Notes',
+        'Practice Problems',
+        'Read Chapter',
+        'Watch Tutorial',
+        'Complete Assignment',
+        'Self-Quiz',
+        'Revise Important Topics',
       ];
-      
-      final scheduleBlocks = <Map<String, dynamic>>[];
-      final random = DateTime.now().millisecondsSinceEpoch;
-      final baseTime = DateTime.now().copyWith(hour: 9, minute: 0, second: 0);
-      
-      // Generate 4-6 study blocks for the day
-      final numBlocks = 4 + (random % 3); // 4-6 blocks
-      var currentOffset = 0;
-      
-      for (int i = 0; i < numBlocks; i++) {
-        final subject = studySubjects[(random + i) % studySubjects.length];
-        final activity = studyActivities[(random + i * 2) % studyActivities.length];
-        final duration = 45 + ((random + i * 3) % 30); // 45-75 minutes
-        
-        scheduleBlocks.add({
-          'taskTitle': '$subject - $activity',
-          'startOffsetMinutes': currentOffset,
+
+      final random = Random();
+      final now = DateTime.now();
+      final baseTime = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        9,
+      );
+
+      final blocks = <Map<String, dynamic>>[];
+      var offset = 0;
+      final count = 4 + random.nextInt(3);
+
+      for (var i = 0; i < count; i++) {
+        final duration = 45 + random.nextInt(31);
+        final start = baseTime.add(Duration(minutes: offset));
+        final end = start.add(Duration(minutes: duration));
+
+        blocks.add({
+          'taskTitle':
+              '${subjects[random.nextInt(subjects.length)]} - '
+              '${activities[random.nextInt(activities.length)]}',
+          'startTime': start,
+          'endTime': end,
           'durationMinutes': duration,
         });
-        
-        currentOffset += duration + 15; // 15 min break between sessions
+
+        offset += duration + 15;
       }
-      
-      print('Generated ${scheduleBlocks.length} schedule blocks locally');
-      
-      // Try to save to Firestore, but don't fail if it doesn't work
+
+      // Display the generated schedule even if cloud saving fails.
+      if (mounted) {
+        setState(() => _schedule = blocks);
+      }
+
       try {
         final firestore = FirebaseFirestore.instance;
         final batch = firestore.batch();
-        final scheduleRef = firestore
+        final collection = firestore
             .collection('users')
             .doc(uid)
             .collection('schedules');
 
-        for (var block in scheduleBlocks) {
-          final docRef = scheduleRef.doc();
-          final start = baseTime.add(
-            Duration(minutes: block['startOffsetMinutes'] as int),
-          );
-          final end = start.add(
-            Duration(minutes: block['durationMinutes'] as int),
-          );
+        for (final block in blocks) {
+          final doc = collection.doc();
 
-          batch.set(docRef, {
+          batch.set(doc, {
             'taskTitle': block['taskTitle'],
-            'startTime': Timestamp.fromDate(start),
-            'endTime': Timestamp.fromDate(end),
+            'startTime': Timestamp.fromDate(
+              block['startTime'] as DateTime,
+            ),
+            'endTime': Timestamp.fromDate(
+              block['endTime'] as DateTime,
+            ),
+            'durationMinutes': block['durationMinutes'],
             'status': 'pending',
+            'createdAt': FieldValue.serverTimestamp(),
           });
         }
 
         await batch.commit();
-        print('Successfully saved to Firestore');
+
+        if (mounted) {
+          setState(() => _savedToCloud = true);
+        }
       } catch (e) {
-        print('Firestore save failed (continuing anyway): $e');
-        // Continue anyway - the UI will show the generated schedule
+        debugPrint('Schedule cloud save failed: $e');
       }
 
-      // Show success message regardless of Firestore save
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('AI Study Schedule generated successfully!'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
+          SnackBar(
+            content: Text(
+              _savedToCloud
+                  ? 'Schedule generated and saved!'
+                  : 'Schedule generated on screen, but cloud save failed.',
+            ),
+            backgroundColor:
+                _savedToCloud ? Colors.green : Colors.orange,
           ),
         );
       }
     } catch (e) {
-      print('Error in generateSchedule: $e');
+      debugPrint('Schedule generation failed: $e');
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Schedule generated successfully!'),
-            backgroundColor: Colors.green,
+          const SnackBar(
+            content: Text('Could not generate schedule. Please try again.'),
+            backgroundColor: Colors.red,
           ),
         );
       }
     } finally {
-      print('Setting generating state to false');
-      if (mounted) setState(() => _isGenerating = false);
+      if (mounted) {
+        setState(() => _isGenerating = false);
+      }
     }
+  }
+
+  String _time(DateTime value) {
+    final hour = value.hour % 12 == 0 ? 12 : value.hour % 12;
+    final minute = value.minute.toString().padLeft(2, '0');
+    final period = value.hour >= 12 ? 'PM' : 'AM';
+    return '$hour:$minute $period';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('AI Schedule Generator')),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.auto_awesome, size: 100, color: Colors.amber),
+      backgroundColor: const Color(0xFFF7F6FC),
+      appBar: AppBar(
+        title: const Text(
+          'AI Schedule Generator',
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
+        backgroundColor: const Color(0xFFF7F6FC),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          if (_schedule.isEmpty) ...[
+            const SizedBox(height: 70),
+            const Icon(
+              Icons.auto_awesome_rounded,
+              size: 90,
+              color: Colors.amber,
+            ),
             const SizedBox(height: 24),
             const Text(
               'Generate Personalized Study Routine',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: _ink,
+              ),
             ),
             const SizedBox(height: 12),
             const Text(
-              'Our AI engine evaluates your pending tasks, estimated duration, exam deadlines, and daily available study time to create an optimized routine.',
+              'Create a sample daily study routine with sessions, '
+              'durations and breaks.',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey),
             ),
-            const SizedBox(height: 36),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton.icon(
-                onPressed: _isGenerating ? null : _generateSchedule,
-                icon: _isGenerating
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Icon(Icons.flash_on),
-                label: Text(
-                  _isGenerating
-                      ? 'Generating Schedule...'
-                      : 'Generate Schedule Now',
+          ] else ...[
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [_ink, _purple, Color(0xFFAA72FF)],
+                ),
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'YOUR STUDY PLAN',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      letterSpacing: 1.2,
+                      fontSize: 11,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${_schedule.length} study sessions planned',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 21,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _savedToCloud
+                        ? 'Saved to your account'
+                        : 'Currently displayed on this screen',
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 22),
+            const Text(
+              'Today’s Routine',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                color: _ink,
+              ),
+            ),
+            const SizedBox(height: 12),
+            for (var i = 0; i < _schedule.length; i++) ...[
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: const Color(0xFFEAE5FA),
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0EBFF),
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      child: const Icon(
+                        Icons.menu_book_rounded,
+                        color: _purple,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _schedule[i]['taskTitle'] as String,
+                            style: const TextStyle(
+                              color: _ink,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 7),
+                          Text(
+                            '${_time(_schedule[i]['startTime'] as DateTime)}'
+                            ' – '
+                            '${_time(_schedule[i]['endTime'] as DateTime)}',
+                            style: const TextStyle(
+                              color: _purple,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${_schedule[i]['durationMinutes']} minutes'
+                            ' • 15-minute break afterwards',
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: _isGenerating ? null : _generateSchedule,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Generate Another Schedule'),
+            ),
+          ],
+          const SizedBox(height: 24),
+          SizedBox(
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: _isGenerating ? null : _generateSchedule,
+              icon: _isGenerating
+                  ? const SizedBox(
+                      width: 19,
+                      height: 19,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.auto_awesome_rounded),
+              label: Text(
+                _isGenerating
+                    ? 'Generating Schedule...'
+                    : _schedule.isEmpty
+                        ? 'Generate Schedule Now'
+                        : 'Regenerate Schedule',
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _purple,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

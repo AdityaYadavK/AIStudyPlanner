@@ -1,10 +1,13 @@
+
 import 'package:go_router/go_router.dart';
 import '../screens/auth.dart';
 import '../screens/calendar.dart';
 import '../screens/dashboard.dart';
+import '../screens/profile.dart';
 import '../screens/generator.dart';
 import '../screens/subjects.dart';
 import '../screens/tasks.dart';
+
 
 final GoRouter appRouter = GoRouter(
 	initialLocation : '/',
@@ -17,7 +20,16 @@ final GoRouter appRouter = GoRouter(
 			path: '/dashboard',
 			builder: (context, state) => const DashboardScreen(),
 		),
-		GoRoute(
+		
+    
+
+GoRoute(
+  path: '/profile',
+  builder: (context, state) => const ProfileScreen(),
+),
+
+
+GoRoute(
 			path: '/subjects',
 			builder: (context, state) => const SubjectManagerScreen(),
 		),

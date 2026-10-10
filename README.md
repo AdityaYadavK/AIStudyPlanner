@@ -71,6 +71,66 @@ flutter pub get
 flutter run
 ```
 
+## Android Release
+
+### Versioning
+
+- Android `versionCode` / `versionName` are sourced from `pubspec.yaml`:
+  - `version: x.y.z+n` → `versionName=x.y.z`, `versionCode=n`
+- Update this field before cutting release tags.
+
+### Local release build (signed)
+
+1. Create `android/key.properties`:
+
+```properties
+storePassword=<keystore-password>
+keyPassword=<key-password>
+keyAlias=<key-alias>
+storeFile=<absolute-or-android-relative-path-to-keystore>
+```
+
+2. Keep the keystore file private and outside version control.
+3. Build release artifacts:
+
+```bash
+flutter pub get
+flutter build appbundle --release
+flutter build apk --release
+```
+
+### Local fallback build (no signing credentials)
+
+- If `android/key.properties` is missing and release signing environment variables are not set, Gradle falls back to debug signing so release builds still complete for validation/testing.
+- These artifacts are **not Play Store production-ready**.
+
+### CI release build (GitHub Actions)
+
+Workflow: `.github/workflows/android-release.yml`
+
+- Triggers on:
+  - Pushes (branches)
+  - Version tags (`v*`, `release-*`)
+  - Manual dispatch
+- CI runs:
+  - `flutter pub get`
+  - `flutter analyze`
+  - `flutter test`
+  - `flutter build appbundle --release`
+  - `flutter build apk --release`
+- Uploaded artifacts:
+  - `android-release-aab`
+  - `android-release-apk`
+
+#### Required GitHub secrets for signed/releasable output
+
+- `ANDROID_KEYSTORE_BASE64` (base64 of the keystore file)
+- `ANDROID_STORE_PASSWORD`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
+
+If these secrets are not configured, CI still builds release artifacts using debug signing fallback.
+
 ##  Firebase Configuration
 
 ### Android — `android/app/build.gradle`

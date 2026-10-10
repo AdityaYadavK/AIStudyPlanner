@@ -41,22 +41,22 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDfU-3tPR7j4G1OX77QgnwMxB14PyD2Jmw',
-    appId: '1:232200820908:web:2fb796fbd0dd4d65f9e709',
-    messagingSenderId: '232200820908',
-    projectId: 'study-planner-jovac-grp1',
-    authDomain: 'study-planner-jovac-grp1.firebaseapp.com',
-    storageBucket: 'study-planner-jovac-grp1.firebasestorage.app',
+    apiKey: 'AIzaSyC9eZRRkISPU5Zy5Rcz5rBhnqw8AM2a4zs',
+    appId: '1:848816487233:web:5f54152145c6af4a177fc0',
+    messagingSenderId: '848816487233',
+    projectId: 'aistudyplanner-abhishek',
+    authDomain: 'aistudyplanner-abhishek.firebaseapp.com',
+    storageBucket: 'aistudyplanner-abhishek.firebasestorage.app',
+    measurementId: 'G-6JLVY6DN2H',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBlZT9QSKjHExIaoyLEYkjTaQP6gM_od-4',
-    appId: '1:232200820908:android:80cc0b510f197eaef9e709',
-    messagingSenderId: '232200820908',
-    projectId: 'study-planner-jovac-grp1',
-    storageBucket: 'study-planner-jovac-grp1.firebasestorage.app',
+    apiKey: 'AIzaSyDl4QxhEP_ugp0adcc-MR9yGAJ8UivXtCQ',
+    appId: '1:848816487233:android:d6b3e2de90091882177fc0',
+    messagingSenderId: '848816487233',
+    projectId: 'aistudyplanner-abhishek',
+    storageBucket: 'aistudyplanner-abhishek.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyB_lNGStMxUOtPJTRc0DyHfpoCeqlIEyXQ',
     appId: '1:232200820908:ios:e3fdbdfc29e0dd79f9e709',
